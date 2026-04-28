@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Microsoft FY25 — AI Capex Pressure on Free Cash Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --ink: #0B2540;
+  --ink-2: #1A1F2E;
+  --ink-3: #5B6472;
+  --ink-4: #9CA3AF;
+  --rule: #E5E7EB;
+  --rule-2: #F1F3F5;
+  --bg: #F7F8FA;
+  --card: #FFFFFF;
+  --accent: #107C41;
+  --accent-soft: rgba(16, 124, 65, 0.10);
+  --accent-2: #4ADE80;
+  --warn: #C0392B;
+  --shadow: 0 1px 2px rgba(11,37,64,0.04), 0 8px 28px rgba(11,37,64,0.06);
+  --radius: 10px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink-2);
+  font-feature-settings: "ss01", "cv11", "tnum";
+  -webkit-font-smoothing: antialiased;
+}
+.app { max-width: 1440px; margin: 0 auto; padding: 28px 36px 48px; }
+
+/* ----------- Top bar ----------- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-mark {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--accent) 0%, #0E5E32 100%);
+  border-radius: 6px;
+  position: relative;
+}
+.brand-mark::after {
+  content: ""; position: absolute; inset: 6px;
+  background: white; border-radius: 2px;
+  clip-path: polygon(0 0, 50% 0, 50% 50%, 100% 50%, 100% 100%, 50% 100%, 50% 50%, 0 50%);
+}
+.brand-text { font-weight: 700; font-size: 14px; color: var(--ink); letter-spacing: 0.02em; }
+.brand-sub { font-size: 11px; color: var(--ink-3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.filters { display: flex; gap: 8px; align-items: center; }
+.filter {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; background: white; border: 1px solid var(--rule);
+  border-radius: 8px; font-size: 12.5px; font-weight: 500; color: var(--ink-2);
+  cursor: pointer; user-select: none; transition: all 0.15s;
+}
+.filter:hover { border-color: var(--ink-4); }
+.filter.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+/* dropdown */
+.dropdown { position: relative; }
+.dropdown .dd-trigger { display: inline-flex; align-items: center; gap: 6px; }
+.dropdown .caret { font-size: 9px; opacity: 0.6; transition: transform 0.15s; }
+.dropdown.open .caret { transform: rotate(180deg); }
+.dropdown.open { border-color: var(--ink); }
+.dropdown-menu {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: white; border: 1px solid var(--rule);
+  border-radius: 8px; box-shadow: 0 8px 28px rgba(11,37,64,0.12);
+  padding: 6px; min-width: 240px;
+  display: none; z-index: 30;
+}
+.dropdown.open .dropdown-menu { display: block; }
+.dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 6px;
+  font-size: 12.5px; color: var(--ink-2);
+  cursor: pointer; user-select: none;
+}
+.dropdown-item:hover { background: var(--rule-2); }
+.dropdown-item input[type="checkbox"], .dropdown-item input[type="radio"] {
+  accent-color: var(--accent); margin: 0;
+}
+.dropdown-item .dd-meta { margin-left: auto; font-size: 11px; color: var(--ink-3); font-weight: 500; }
+.dropdown-divider { height: 1px; background: var(--rule); margin: 4px 0; }
+.dropdown-action { color: var(--accent); font-weight: 600; }
+
+/* ----------- Hero header ----------- */
+.hero {
+  background: var(--card);
+  padding: 28px 32px;
+  border-radius: var(--radius);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+.hero-kicker {
+  font-size: 10.5px; font-weight: 700; color: var(--accent);
+  letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px;
+}
+.hero-kicker .fy-tag {
+  margin-left: 8px; padding: 2px 8px; background: var(--accent-soft);
+  color: var(--accent); border-radius: 10px; font-size: 9.5px; letter-spacing: 0.1em;
+}
+.hero-title {
+  font-size: 28px; font-weight: 700; color: var(--ink);
+  letter-spacing: -0.015em; line-height: 1.2;
+  margin: 0 0 14px;
+}
+.hero-insights {
+  display: flex; gap: 24px; flex-wrap: wrap;
+  padding-top: 14px; border-top: 1px solid var(--rule);
+  margin-top: 4px;
+}
+.hero-insight {
+  flex: 1; min-width: 280px; display: flex; gap: 12px; align-items: flex-start;
+}
+.hero-insight .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  margin-top: 8px; flex-shrink: 0;
+}
+.hero-insight .dot.warn { background: var(--warn); }
+.hero-insight .dot.neutral { background: var(--ink-3); }
+.hero-insight .text { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+.hero-insight .text strong { color: var(--ink); font-weight: 600; }
+
+/* ----------- KPI cards ----------- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.kpi {
+  background: var(--card); padding: 22px 24px;
+  border-radius: var(--radius); border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.kpi.pri { border-left: 3px solid var(--accent); }
+.kpi.warn { border-left: 3px solid var(--warn); }
+.kpi-label {
+  font-size: 11px; color: var(--ink-3); font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px;
+}
+.kpi-value {
+  font-size: 34px; font-weight: 700; color: var(--ink);
+  letter-spacing: -0.02em; line-height: 1;
+}
+.kpi-value .unit {
+  font-size: 18px; font-weight: 600; color: var(--ink-3);
+  margin-left: 2px;
+}
+.kpi-delta {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 12px; padding: 3px 9px; border-radius: 12px;
+  font-size: 11.5px; font-weight: 600;
+}
+.kpi-delta.up { background: var(--accent-soft); color: var(--accent); }
+.kpi-delta.down { background: rgba(192, 57, 43, 0.08); color: var(--warn); }
+.kpi-delta.neutral { background: var(--rule-2); color: var(--ink-3); }
+.kpi-foot { margin-top: 10px; font-size: 11.5px; color: var(--ink-3); }
+.kpi-spark { position: absolute; right: 14px; top: 16px; width: 80px; height: 32px; opacity: 0.65; }
+
+/* ----------- Charts ----------- */
+.row { display: grid; gap: 14px; margin-bottom: 14px; }
+.row.hero-row { grid-template-columns: 1.7fr 1fr; }
+.row.split { grid-template-columns: 1fr 1fr; }
+.panel {
+  background: var(--card); padding: 22px 26px 18px;
+  border-radius: var(--radius); border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+}
+.panel-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 4px;
+}
+.panel-title {
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  letter-spacing: -0.005em; margin: 0 0 2px;
+}
+.panel-sub { font-size: 11.5px; color: var(--ink-3); font-weight: 500; }
+.panel-toggle {
+  display: inline-flex; gap: 0; background: var(--rule-2); padding: 3px;
+  border-radius: 6px;
+}
+.panel-toggle button {
+  border: none; background: transparent; padding: 4px 10px;
+  font-size: 11.5px; font-weight: 600; color: var(--ink-3);
+  border-radius: 4px; cursor: pointer; font-family: inherit;
+}
+.panel-toggle button.active { background: white; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.chart-wrap { position: relative; margin-top: 14px; height: 280px; }
+.chart-wrap.compact { height: 220px; }
+
+/* ----------- Bottom strip ----------- */
+.bottom-strip {
+  background: var(--ink); color: white;
+  padding: 18px 28px; border-radius: var(--radius);
+  display: flex; gap: 28px; align-items: center;
+}
+.bottom-strip .label {
+  font-size: 11px; font-weight: 700; color: var(--accent-2);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  flex-shrink: 0;
+}
+.bottom-strip .body {
+  font-size: 13.5px; font-weight: 500; line-height: 1.5;
+  color: rgba(255,255,255,0.92);
+}
+.bottom-strip .body strong { color: white; font-weight: 700; }
+
+/* segment table */
+.seg-list { margin-top: 18px; }
+.seg-row {
+  display: grid; grid-template-columns: 1fr auto 80px;
+  gap: 14px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--rule-2);
+  transition: opacity 0.2s;
+}
+.seg-row.hidden { display: none; }
+.seg-row:last-child { border-bottom: none; }
+.seg-name { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.seg-name .meta { display: block; font-size: 10.5px; color: var(--ink-3); font-weight: 500; margin-top: 1px; }
+.seg-bar {
+  position: relative; height: 6px; width: 100%;
+  background: var(--rule-2); border-radius: 3px; overflow: hidden;
+}
+.seg-bar > span {
+  position: absolute; left: 0; top: 0; height: 100%; border-radius: 3px;
+}
+.seg-yoy { font-size: 13px; font-weight: 700; color: var(--accent); text-align: right; font-variant-numeric: tabular-nums; }
+.seg-yoy.lag { color: var(--ink-3); }
+.seg-yoy.warn { color: var(--warn); }
+
+/* footer */
+.footer {
+  margin-top: 18px; display: flex; justify-content: space-between;
+  font-size: 10.5px; color: var(--ink-4); padding: 0 4px;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-text">Microsoft Corporation · MSFT</div>
+        <div class="brand-sub">Equity Research · FY2025 10-K</div>
+      </div>
+    </div>
+    <div class="filters">
+      <div class="filter active" data-fy-idx="2" onclick="setView(this)">FY25</div>
+      <div class="filter" data-fy-idx="1" onclick="setView(this)">FY24</div>
+      <div class="filter" data-fy-idx="0" onclick="setView(this)">FY23</div>
+
+      <div class="filter dropdown" id="seg-dd" style="border-left: 1px solid var(--rule); margin-left: 8px; padding-left: 14px;" onclick="toggleDropdown('seg-dd', event)">
+        <span class="dd-trigger">
+          <span class="dd-label">All segments</span>
+          <span class="caret">▼</span>
+        </span>
+        <div class="dropdown-menu" onclick="event.stopPropagation()">
+          <label class="dropdown-item"><input type="checkbox" checked data-seg-idx="0"> <span>Intelligent Cloud</span> <span class="dd-meta">+21.5%</span></label><label class="dropdown-item"><input type="checkbox" checked data-seg-idx="1"> <span>Productivity & Business Processes</span> <span class="dd-meta">+13.0%</span></label><label class="dropdown-item"><input type="checkbox" checked data-seg-idx="2"> <span>More Personal Computing</span> <span class="dd-meta">+7.5%</span></label>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item dropdown-action" onclick="resetSegments()">Show all</div>
+        </div>
+      </div>
+
+      <div class="filter dropdown" id="range-dd" onclick="toggleDropdown('range-dd', event)">
+        <span class="dd-trigger">
+          <span class="dd-label">Last 3 yrs</span>
+          <span class="caret">▼</span>
+        </span>
+        <div class="dropdown-menu" onclick="event.stopPropagation()">
+          <label class="dropdown-item"><input type="radio" name="range" value="3" checked> Last 3 fiscal years <span class="dd-meta">FY23–FY25</span></label>
+          <label class="dropdown-item"><input type="radio" name="range" value="2"> Last 2 fiscal years <span class="dd-meta">FY24–FY25</span></label>
+          <label class="dropdown-item"><input type="radio" name="range" value="1"> Current FY only <span class="dd-meta">FY25</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-kicker">EXECUTIVE READOUT · WHY THIS MATTERS <span class="fy-tag" id="fy-tag">FY25 SNAPSHOT</span></div>
+    <h1 class="hero-title">AI capex (+45% YoY) is outrunning operating cash flow — FCF compressed despite +14.9% revenue growth</h1>
+    <div class="hero-insights">
+      <div class="hero-insight"><span class="dot "></span><div class="text"><strong>Azure (+34%) is the engine.</strong> Intelligent Cloud grew $18.8B (+21.5%) in absolute dollars — single-largest growth driver in the portfolio.</div></div><div class="hero-insight"><span class="dot warn"></span><div class="text"><strong>FCF down 3.3% YoY</strong> to $71.6B even as revenue rose $36.6B. Capex now consumes 47% of OCF, vs 37% prior year.</div></div><div class="hero-insight"><span class="dot neutral"></span><div class="text"><strong>Sustainability hinges on Azure holding above 30% growth</strong> while capex moderates by FY27. Watch ROIC inflection.</div></div>
+    </div>
+  </div>
+
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi pri">
+      <div class="kpi-label">Revenue Growth (YoY)</div>
+      <div class="kpi-value">14.9<span class="unit">%</span></div>
+      <div class="kpi-delta down">▼ –80 bps vs FY24</div>
+      <div class="kpi-foot">$281.7B total · vs $245.1B prior</div>
+      <canvas class="kpi-spark" id="spark1"></canvas>
+    </div><div class="kpi pri">
+      <div class="kpi-label">Operating Margin</div>
+      <div class="kpi-value">45.6<span class="unit">%</span></div>
+      <div class="kpi-delta up">▲ +90 bps</div>
+      <div class="kpi-foot">+380 bps vs FY23 · best-in-class</div>
+      <canvas class="kpi-spark" id="spark2"></canvas>
+    </div><div class="kpi warn">
+      <div class="kpi-label">Free Cash Flow</div>
+      <div class="kpi-value">$71.6<span class="unit">B</span></div>
+      <div class="kpi-delta down">▼ –3.3% YoY</div>
+      <div class="kpi-foot">First decline in 4 years · capex-driven</div>
+      <canvas class="kpi-spark" id="spark3"></canvas>
+    </div><div class="kpi warn">
+      <div class="kpi-label">Capex</div>
+      <div class="kpi-value">$64.6<span class="unit">B</span></div>
+      <div class="kpi-delta down">▲ +45.1% YoY</div>
+      <div class="kpi-foot">22.9% of revenue, vs 13.3% in FY23</div>
+      <canvas class="kpi-spark" id="spark4"></canvas>
+    </div>
+  </div>
+
+  <div class="row hero-row">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3 class="panel-title">Capex is now compressing free cash flow</h3>
+          <div class="panel-sub">Operating cash flow vs. capex vs. free cash flow ($B), FY23–FY25</div>
+        </div>
+        <div class="panel-toggle">
+          <button class="active" onclick="setMetric(this,'cash')">Cash flow</button>
+          <button onclick="setMetric(this,'margin')">% of revenue</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="combo"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3 class="panel-title">Revenue trajectory</h3>
+          <div class="panel-sub">$B, three-year trend with YoY growth</div>
+        </div>
+      </div>
+      <div class="chart-wrap compact"><canvas id="rev"></canvas></div>
+    </div>
+  </div>
+
+  <div class="row split">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3 class="panel-title">Where growth is concentrated</h3>
+          <div class="panel-sub">Segment revenue, FY25 ($B), sorted by YoY%</div>
+        </div>
+      </div>
+      <div class="seg-list" id="seg-list">
+        <div class="seg-row" data-seg-idx="0">
+          <div class="seg-name">Intelligent Cloud<span class="meta">Azure, server products, enterprise services</span></div>
+          <div class="seg-bar"><span style="width: 100%; background: var(--accent);"></span></div>
+          <div class="seg-yoy ">+21.5%</div>
+        </div><div class="seg-row" data-seg-idx="1">
+          <div class="seg-name">Productivity & Business Processes<span class="meta">M365, LinkedIn, Dynamics</span></div>
+          <div class="seg-bar"><span style="width: 60%; background: var(--accent);"></span></div>
+          <div class="seg-yoy ">+13.0%</div>
+        </div><div class="seg-row" data-seg-idx="2">
+          <div class="seg-name">More Personal Computing<span class="meta">Windows, devices, gaming, search</span></div>
+          <div class="seg-bar"><span style="width: 35%; background: #94A3B8;"></span></div>
+          <div class="seg-yoy lag">+7.5%</div>
+        </div>
+      </div>
+      <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 11.5px; color: var(--ink-3);">
+        <strong style="color: var(--ink);">Insight:</strong> Intelligent Cloud added $18.8B vs P&BP +$14.0B and MPC +$3.8B. Cloud is now 38% of revenue mix vs 35% prior year.
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3 class="panel-title">Margins are expanding even with AI investment</h3>
+          <div class="panel-sub">Operating, gross, and net margin %, FY23–FY25</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="margins"></canvas></div>
+    </div>
+  </div>
+
+  <div class="bottom-strip">
+    <div class="label">BOTTOM LINE</div>
+    <div class="body">Microsoft converts AI demand into revenue better than any peer, but <strong>Capex/OCF gap widening from 32% to 47% in two years is the single most important watch metric.</strong> If Azure growth dips below 25% while capex stays >$60B, FCF could turn negative on a TTM basis by FY27.</div>
+  </div>
+
+  <div class="footer">
+    <span>Source: Microsoft Corporation 10-K, FY2025 · Internal use only · Equity research view</span>
+    <span>Refreshed FY2025 close · Connector: 10-K analyst pack</span>
+  </div>
+</div>
+
+<script>
+const PALETTE = {
+  ink: '#0B2540', ink2: '#1A1F2E', ink3: '#5B6472', ink4: '#9CA3AF',
+  rule: '#E5E7EB',
+  accent: '#107C41', accent2: '#4ADE80', warn: '#C0392B',
+  capex: '#94A3B8', fcf: '#107C41', ocf: '#0B2540'
+};
+
+Chart.defaults.font.family = "Inter, system-ui";
+Chart.defaults.font.size = 11.5;
+Chart.defaults.color = PALETTE.ink3;
+
+// ---- Data series (full 3-yr range) ----
+const FY = ["FY23", "FY24", "FY25"];
+const KPI_SNAPSHOTS = [[{"value": "7.0", "unit": "%", "delta": "\u25bc \u20131100 bps vs FY22", "dir": "down", "foot": "$211.9B total \u00b7 vs $198.3B prior"}, {"value": "41.8", "unit": "%", "delta": "\u25bc \u2013240 bps", "dir": "down", "foot": "Pre-AI build \u00b7 baseline year"}, {"value": "$59.5", "unit": "B", "delta": "\u25b2 +1.5% YoY", "dir": "up", "foot": "OCF $87.6B \u2212 Capex $28.1B"}, {"value": "$28.1", "unit": "B", "delta": "\u25b2 +1.0% YoY", "dir": "up", "foot": "13.3% of revenue \u00b7 pre-AI build"}], [{"value": "15.7", "unit": "%", "delta": "\u25b2 +870 bps vs FY23", "dir": "up", "foot": "$245.1B total \u00b7 vs $211.9B prior"}, {"value": "44.7", "unit": "%", "delta": "\u25b2 +290 bps", "dir": "up", "foot": "+290 bps vs FY23"}, {"value": "$74.1", "unit": "B", "delta": "\u25b2 +24.5% YoY", "dir": "up", "foot": "OCF $118.5B \u2212 Capex $44.5B"}, {"value": "$44.5", "unit": "B", "delta": "\u25b2 +58.4% YoY", "dir": "down", "foot": "18.1% of revenue \u00b7 AI build accelerating"}], [{"value": "14.9", "unit": "%", "delta": "\u25bc \u201380 bps vs FY24", "dir": "down", "foot": "$281.7B total \u00b7 vs $245.1B prior"}, {"value": "45.6", "unit": "%", "delta": "\u25b2 +90 bps", "dir": "up", "foot": "+380 bps vs FY23 \u00b7 best-in-class"}, {"value": "$71.6", "unit": "B", "delta": "\u25bc \u20133.3% YoY", "dir": "down", "foot": "First decline in 4 years \u00b7 capex-driven"}, {"value": "$64.6", "unit": "B", "delta": "\u25b2 +45.1% YoY", "dir": "down", "foot": "22.9% of revenue, vs 13.3% in FY23"}]];
+
+const COMBO_CASH_FULL = {
+  ocf:  [87.6, 118.5, 136.2],
+  capex:[28.1, 44.5, 64.6],
+  fcf:  [59.5, 74.1, 71.6]
+};
+const COMBO_PCT_FULL = {
+  ocf:  [41.3, 48.3, 48.3],
+  capex:[13.3, 18.1, 22.9],
+  fcf:  [28.1, 30.2, 25.4]
+};
+const COMBO_LABELS_CASH = ["Operating cash flow", "Capex", "Free cash flow"];
+const COMBO_LABELS_PCT  = ["OCF / Revenue %", "Capex / Revenue %", "FCF / Revenue %"];
+
+const REV_DATA_FULL = [211.9, 245.1, 281.7];
+const GROSS_FULL = [68.8, 69.8, 68.9];
+const OPMARG_FULL = [41.8, 44.7, 45.6];
+const NETMARG_FULL = [34.1, 36.0, 36.1];
+
+let currentMetric = 'cash';   // 'cash' | 'margin'
+let currentRange = 3;          // 3 | 2 | 1
+let highlightIdx = 2;          // which FY is "active"
+
+function spark(id, vals, color) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels: vals.map((_,i)=>i), datasets: [{
+      data: vals, borderColor: color, borderWidth: 1.6, fill: true,
+      backgroundColor: color + '22', tension: 0.35, pointRadius: 0
+    }] },
+    options: {
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false } },
+      maintainAspectRatio: false, responsive: true,
+    }
+  });
+}
+spark('spark1', [7.0, 15.7, 14.9], PALETTE.accent);spark('spark2', [41.8, 44.7, 45.6], PALETTE.accent);spark('spark3', [59.5, 74.1, 71.6], PALETTE.warn);spark('spark4', [28.1, 44.5, 64.6], PALETTE.warn);
+
+function getRangeSlice(arr) { return arr.slice(arr.length - currentRange); }
+
+window.combo = new Chart(document.getElementById('combo'), {
+  data: {
+    labels: getRangeSlice(FY),
+    datasets: [
+      { type: 'bar', label: COMBO_LABELS_CASH[0], data: getRangeSlice(COMBO_CASH_FULL.ocf),
+        backgroundColor: PALETTE.ink, borderRadius: 3, barPercentage: 0.6, categoryPercentage: 0.7 },
+      { type: 'bar', label: COMBO_LABELS_CASH[1], data: getRangeSlice(COMBO_CASH_FULL.capex),
+        backgroundColor: PALETTE.capex, borderRadius: 3, barPercentage: 0.6, categoryPercentage: 0.7 },
+      { type: 'line', label: COMBO_LABELS_CASH[2], data: getRangeSlice(COMBO_CASH_FULL.fcf),
+        borderColor: PALETTE.accent, borderWidth: 2.4,
+        backgroundColor: 'transparent', tension: 0.25,
+        pointBackgroundColor: 'white', pointBorderColor: PALETTE.accent,
+        pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    layout: { padding: { top: 18 } },
+    plugins: {
+      legend: { position: 'top', align: 'end',
+        labels: { boxWidth: 10, boxHeight: 10, padding: 14, usePointStyle: true, pointStyle: 'rect', font: { size: 11.5, weight: '500' } }
+      },
+      tooltip: {
+        backgroundColor: PALETTE.ink, padding: 10, cornerRadius: 6,
+        callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${currentMetric==='margin' ? ctx.parsed.y+'%' : '$'+ctx.parsed.y+'B'}` }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, border: { color: PALETTE.rule } },
+      y: { grid: { color: PALETTE.rule }, border: { display: false },
+           ticks: { callback: v => '$' + v + 'B' } }
+    }
+  }
+});
+
+window.rev = new Chart(document.getElementById('rev'), {
+  type: 'bar',
+  data: {
+    labels: getRangeSlice(FY),
+    datasets: [{
+      label: 'Revenue', data: getRangeSlice(REV_DATA_FULL),
+      backgroundColor: getRevenueColors(),
+      borderRadius: 4, barPercentage: 0.55,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    layout: { padding: { top: 22 } },
+    plugins: {
+      legend: { display: false },
+      tooltip: { backgroundColor: PALETTE.ink, padding: 10, cornerRadius: 6,
+                 callbacks: { label: c => ` $${c.parsed.y}B` } }
+    },
+    scales: {
+      x: { grid: { display: false }, border: { color: PALETTE.rule } },
+      y: { display: false }
+    }
+  },
+  plugins: [{
+    id: 'dataLabels',
+    afterDatasetsDraw(chart) {
+      const {ctx, data} = chart;
+      const ds = data.datasets[0];
+      ds.data.forEach((v, i) => {
+        const bar = chart.getDatasetMeta(0).data[i];
+        ctx.fillStyle = PALETTE.ink2;
+        ctx.font = "700 13px Inter";
+        ctx.textAlign = 'center';
+        ctx.fillText('$' + v + 'B', bar.x, bar.y - 8);
+        if (i > 0) {
+          const yoy = ((v - ds.data[i-1]) / ds.data[i-1]) * 100;
+          ctx.fillStyle = PALETTE.ink3;
+          ctx.font = "600 10.5px Inter";
+          const sign = yoy >= 0 ? '+' : '';
+          ctx.fillText(sign + yoy.toFixed(1) + '%', bar.x, bar.y + 10);
+        }
+      });
+    }
+  }]
+});
+
+window.margins = new Chart(document.getElementById('margins'), {
+  type: 'line',
+  data: {
+    labels: getRangeSlice(FY),
+    datasets: [
+      { label: 'Gross margin', data: getRangeSlice(GROSS_FULL),
+        borderColor: PALETTE.ink, backgroundColor: 'transparent',
+        borderWidth: 2, tension: 0.25,
+        pointBackgroundColor: 'white', pointBorderColor: PALETTE.ink,
+        pointBorderWidth: 2, pointRadius: 4 },
+      { label: 'Operating margin', data: getRangeSlice(OPMARG_FULL),
+        borderColor: PALETTE.accent, backgroundColor: 'transparent',
+        borderWidth: 2.5, tension: 0.25,
+        pointBackgroundColor: 'white', pointBorderColor: PALETTE.accent,
+        pointBorderWidth: 2.5, pointRadius: 5 },
+      { label: 'Net margin', data: getRangeSlice(NETMARG_FULL),
+        borderColor: PALETTE.ink3, backgroundColor: 'transparent',
+        borderWidth: 1.8, borderDash: [3,3], tension: 0.25,
+        pointBackgroundColor: 'white', pointBorderColor: PALETTE.ink3,
+        pointBorderWidth: 2, pointRadius: 4 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    layout: { padding: { top: 12 } },
+    plugins: {
+      legend: { position: 'top', align: 'end',
+        labels: { boxWidth: 22, boxHeight: 2, padding: 12, font: { size: 11.5, weight: '500' } } },
+      tooltip: { backgroundColor: PALETTE.ink, padding: 10, cornerRadius: 6,
+                 callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y}%` } }
+    },
+    scales: {
+      x: { grid: { display: false }, border: { color: PALETTE.rule } },
+      y: { grid: { color: PALETTE.rule }, border: { display: false },
+           ticks: { callback: v => v + '%' },
+           min: 30, max: 75 }
+    }
+  }
+});
+
+// ===== Handlers =====
+
+function getRevenueColors() {
+  // highlight the currently-active FY in the revenue chart
+  const slice = getRangeSlice(FY);
+  return slice.map((_, i) => {
+    const fullIdx = FY.length - currentRange + i;
+    return fullIdx === highlightIdx ? PALETTE.accent : '#1A1F2E';
+  });
+}
+
+function applyKpiSnapshot(idx) {
+  const snap = KPI_SNAPSHOTS[idx];
+  const cards = document.querySelectorAll('.kpi');
+  snap.forEach((s, i) => {
+    if (!cards[i]) return;
+    cards[i].querySelector('.kpi-value').innerHTML = s.value + '<span class="unit">' + s.unit + '</span>';
+    const delta = cards[i].querySelector('.kpi-delta');
+    delta.textContent = s.delta;
+    delta.className = 'kpi-delta ' + s.dir;
+    cards[i].querySelector('.kpi-foot').textContent = s.foot;
+  });
+}
+
+function setView(btn) {
+  const idx = +btn.dataset.fyIdx;
+  highlightIdx = idx;
+  // active state
+  btn.parentNode.querySelectorAll('.filter').forEach(f => {
+    if (f.dataset.fyIdx !== undefined) f.classList.remove('active');
+  });
+  btn.classList.add('active');
+  // KPI snapshot
+  applyKpiSnapshot(idx);
+  // hero tag
+  document.getElementById('fy-tag').textContent = FY[idx] + ' SNAPSHOT';
+  // recolor revenue bars
+  window.rev.data.datasets[0].backgroundColor = getRevenueColors();
+  window.rev.update();
+}
+
+function setMetric(el, m) {
+  currentMetric = m;
+  el.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  refreshCombo();
+}
+
+function refreshCombo() {
+  const src = currentMetric === 'margin' ? COMBO_PCT_FULL : COMBO_CASH_FULL;
+  const labels = currentMetric === 'margin' ? COMBO_LABELS_PCT : COMBO_LABELS_CASH;
+  window.combo.data.labels = getRangeSlice(FY);
+  window.combo.data.datasets[0].data = getRangeSlice(src.ocf);
+  window.combo.data.datasets[0].label = labels[0];
+  window.combo.data.datasets[1].data = getRangeSlice(src.capex);
+  window.combo.data.datasets[1].label = labels[1];
+  window.combo.data.datasets[2].data = getRangeSlice(src.fcf);
+  window.combo.data.datasets[2].label = labels[2];
+  window.combo.options.scales.y.ticks.callback = v => currentMetric==='margin' ? v + '%' : '$' + v + 'B';
+  window.combo.update();
+}
+
+function refreshAllCharts() {
+  refreshCombo();
+  window.rev.data.labels = getRangeSlice(FY);
+  window.rev.data.datasets[0].data = getRangeSlice(REV_DATA_FULL);
+  window.rev.data.datasets[0].backgroundColor = getRevenueColors();
+  window.rev.update();
+  window.margins.data.labels = getRangeSlice(FY);
+  window.margins.data.datasets[0].data = getRangeSlice(GROSS_FULL);
+  window.margins.data.datasets[1].data = getRangeSlice(OPMARG_FULL);
+  window.margins.data.datasets[2].data = getRangeSlice(NETMARG_FULL);
+  window.margins.update();
+}
+
+function toggleDropdown(id, e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById(id);
+  document.querySelectorAll('.dropdown.open').forEach(d => { if (d.id !== id) d.classList.remove('open'); });
+  dd.classList.toggle('open');
+}
+
+function setSegmentVisibility() {
+  const checks = [...document.querySelectorAll('#seg-dd input[type=checkbox]')];
+  const rows = document.querySelectorAll('#seg-list .seg-row');
+  checks.forEach((c, i) => {
+    if (rows[i]) rows[i].classList.toggle('hidden', !c.checked);
+  });
+  const cnt = checks.filter(c => c.checked).length;
+  const lbl = document.querySelector('#seg-dd .dd-label');
+  lbl.textContent = cnt === checks.length ? 'All segments' : `${cnt}/${checks.length} segments`;
+}
+
+function resetSegments() {
+  document.querySelectorAll('#seg-dd input[type=checkbox]').forEach(c => c.checked = true);
+  setSegmentVisibility();
+}
+
+document.querySelectorAll('#seg-dd input[type=checkbox]').forEach(c =>
+  c.addEventListener('change', setSegmentVisibility)
+);
+
+document.querySelectorAll('#range-dd input[type=radio]').forEach(r => {
+  r.addEventListener('change', () => {
+    currentRange = +r.value;
+    const lbl = document.querySelector('#range-dd .dd-label');
+    lbl.textContent = currentRange === 3 ? 'Last 3 yrs' : (currentRange === 2 ? 'Last 2 yrs' : 'Current FY');
+    // keep highlight valid
+    if (highlightIdx < FY.length - currentRange) highlightIdx = FY.length - 1;
+    refreshAllCharts();
+  });
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown')) {
+    document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>
